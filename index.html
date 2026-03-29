@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ad Copy Tester</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    h1 span { color: #6366f1; }
+
+    .subtitle {
+      color: #737373;
+      font-size: 15px;
+    }
+
+    .input-section {
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 4px;
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+
+    .mode-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #737373;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: #6366f1;
+      color: #fff;
+    }
+
+    .input-group { position: relative; }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #a3a3a3;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    textarea, input[type="url"] {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      color: #e5e5e5;
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus, input[type="url"]:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    textarea { min-height: 100px; }
+    input[type="url"] { height: 52px; }
+
+    .hidden { display: none !important; }
+
+    /* Tone selector */
+    .tone-section {
+      margin-top: 20px;
+      margin-bottom: 4px;
+    }
+
+    .tone-section label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #a3a3a3;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tone-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tone-pill {
+      padding: 8px 18px;
+      border: 1px solid #333;
+      border-radius: 20px;
+      background: transparent;
+      color: #737373;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tone-pill:hover {
+      border-color: #6366f1;
+      color: #a5b4fc;
+    }
+
+    .tone-pill.active {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: #fff;
+    }
+
+    .generate-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .generate-btn:hover { background: #4f46e5; }
+    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .results-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .source-badge {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #1e1b4b;
+      color: #a5b4fc;
+      font-weight: 500;
+    }
+
+    .tone-badge {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #1a1a2e;
+      color: #c084fc;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    .product-summary {
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #a3a3a3;
+      line-height: 1.6;
+    }
+
+    .product-summary strong { color: #e5e5e5; }
+
+    .ads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    /* Ad Card */
+    .ad-card {
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .ad-card:hover { border-color: #404040; }
+
+    .ad-card-header {
+      padding: 14px 20px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .angle-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .angle-dot.problem { background: #ef4444; }
+    .angle-dot.solution { background: #22c55e; }
+    .angle-dot.curiosity { background: #f59e0b; }
+    .angle-dot.social_proof { background: #3b82f6; }
+    .angle-dot.urgency { background: #ec4899; }
+
+    .angle-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #737373;
+      flex: 1;
+    }
+
+    .download-single-btn {
+      background: none;
+      border: none;
+      color: #525252;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .download-single-btn:hover { color: #a5b4fc; background: #1a1a2e; }
+
+    .ad-primary-text {
+      padding: 0 20px 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #d4d4d4;
+    }
+
+    /* Full ad creative image */
+    .ad-creative {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #1a1a1a;
+      overflow: hidden;
+    }
+
+    .ad-creative img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ad-creative-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #404040;
+      font-size: 13px;
+    }
+
+    /* Bottom bar */
+    .ad-bottom {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #262626;
+    }
+
+    .ad-audience {
+      font-size: 11px;
+      color: #525252;
+      line-height: 1.4;
+    }
+
+    /* Score badge & panel */
+    .score-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .score-badge:hover { opacity: 0.8; }
+
+    .score-badge.green { background: #14532d; color: #4ade80; }
+    .score-badge.yellow { background: #422006; color: #fbbf24; }
+    .score-badge.red { background: #450a0a; color: #f87171; }
+
+    .score-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      border-top: 0px solid #262626;
+    }
+
+    .score-panel.open {
+      max-height: 300px;
+      border-top-width: 1px;
+    }
+
+    .score-panel-inner {
+      padding: 14px 20px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #a3a3a3;
+    }
+
+    .score-item span:last-child {
+      font-weight: 600;
+      color: #e5e5e5;
+    }
+
+    .score-bar {
+      width: 40px;
+      height: 4px;
+      background: #262626;
+      border-radius: 2px;
+      overflow: hidden;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .score-tip {
+      font-size: 12px;
+      color: #737373;
+      font-style: italic;
+      line-height: 1.5;
+      padding-top: 8px;
+      border-top: 1px solid #1f1f1f;
+    }
+
+    /* Actions */
+    .action-btn {
+      padding: 8px 16px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #a3a3a3;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover { background: #262626; color: #fff; }
+
+    .action-btn.zip-btn {
+      background: #1e1b4b;
+      border-color: #312e81;
+      color: #a5b4fc;
+    }
+
+    .action-btn.zip-btn:hover { background: #312e81; color: #fff; }
+
+    .error-msg {
+      background: #1c0f0f;
+      border: 1px solid #7f1d1d;
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #fca5a5;
+      font-size: 14px;
+    }
+
+    .examples {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .example-chip {
+      padding: 6px 14px;
+      background: #1a1a1a;
+      border: 1px solid #262626;
+      border-radius: 20px;
+      color: #737373;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .example-chip:hover {
+      border-color: #6366f1;
+      color: #a5b4fc;
+    }
+
+    .progress-msg {
+      text-align: center;
+      padding: 40px 20px;
+      color: #737373;
+      font-size: 14px;
+    }
+
+    .progress-msg .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #262626;
+      border-top-color: #6366f1;
+      margin: 0 auto 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Ad Copy <span>Tester</span></h1>
+      <p class="subtitle">Generate 5 Meta ad variants with AI-generated images from an idea or URL</p>
+    </header>
+
+    <div class="input-section">
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="idea" onclick="switchMode('idea')">Idea</button>
+        <button class="mode-btn" data-mode="url" onclick="switchMode('url')">URL</button>
+      </div>
+
+      <div class="input-group" id="idea-input">
+        <label>Describe your business idea</label>
+        <textarea id="idea" placeholder="e.g. A mobile app that helps freelance contractors track material costs and generate instant bid sheets for clients"></textarea>
+        <div class="examples">
+          <span class="example-chip" onclick="fillExample('A SaaS tool that helps restaurants auto-generate weekly menus based on seasonal ingredient prices')">Restaurant menus</span>
+          <span class="example-chip" onclick="fillExample('An app for DJs to organize and tag their music library with BPM, key, and energy level')">DJ library</span>
+          <span class="example-chip" onclick="fillExample('A browser extension that tracks package deliveries from any carrier in one dashboard')">Package tracking</span>
+        </div>
+      </div>
+
+      <div class="input-group hidden" id="url-input">
+        <label>Enter a website URL to analyze</label>
+        <input type="url" id="url" placeholder="https://example.com">
+        <div class="examples">
+          <span class="example-chip" onclick="fillUrl('https://notion.so')">Notion</span>
+          <span class="example-chip" onclick="fillUrl('https://linear.app')">Linear</span>
+          <span class="example-chip" onclick="fillUrl('https://cal.com')">Cal.com</span>
+        </div>
+      </div>
+
+      <div class="tone-section">
+        <label>Tone / Style</label>
+        <div class="tone-pills">
+          <button class="tone-pill active" data-tone="professional" onclick="selectTone(this)">Professional</button>
+          <button class="tone-pill" data-tone="playful" onclick="selectTone(this)">Playful</button>
+          <button class="tone-pill" data-tone="bold" onclick="selectTone(this)">Bold</button>
+          <button class="tone-pill" data-tone="minimal" onclick="selectTone(this)">Minimal</button>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generate" onclick="generate()">
+        Generate 5 Ad Variants
+      </button>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <script>
+    let currentMode = localStorage.getItem("adtester-mode") || "idea";
+    let currentTone = localStorage.getItem("adtester-tone") || "professional";
+    let lastGeneratedData = null;
+
+    function switchMode(mode) {
+      currentMode = mode;
+      localStorage.setItem("adtester-mode", mode);
+      document.querySelectorAll(".mode-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.mode === mode);
+      });
+      document.getElementById("idea-input").classList.toggle("hidden", mode !== "idea");
+      document.getElementById("url-input").classList.toggle("hidden", mode !== "url");
+    }
+
+    switchMode(currentMode);
+
+    function selectTone(el) {
+      currentTone = el.dataset.tone;
+      localStorage.setItem("adtester-tone", currentTone);
+      document.querySelectorAll(".tone-pill").forEach((b) => {
+        b.classList.toggle("active", b.dataset.tone === currentTone);
+      });
+    }
+
+    // Apply saved tone on load
+    document.querySelectorAll(".tone-pill").forEach((b) => {
+      b.classList.toggle("active", b.dataset.tone === currentTone);
+    });
+
+    function fillExample(text) {
+      document.getElementById("idea").value = text;
+    }
+
+    function fillUrl(url) {
+      document.getElementById("url").value = url;
+    }
+
+    async function generate() {
+      const btn = document.getElementById("generate");
+      const resultsEl = document.getElementById("results");
+
+      const payload =
+        currentMode === "idea"
+          ? { idea: document.getElementById("idea").value.trim() }
+          : { url: document.getElementById("url").value.trim() };
+
+      if (!payload.idea && !payload.url) return;
+
+      payload.tone = currentTone;
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Generating...';
+      resultsEl.innerHTML = `
+        <div class="progress-msg">
+          <div class="spinner"></div>
+          Generating ad copy, images, and quality scores...<br>
+          <span style="font-size:12px;color:#525252">This takes ~30-60 seconds for 5 variants</span>
+        </div>`;
+
+      try {
+        const res = await fetch("/api/generate-ads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(text || "Request failed - non-JSON response");
+        }
+
+        if (!res.ok) throw new Error(data.error || "Request failed");
+
+        lastGeneratedData = data;
+        renderResults(data);
+      } catch (err) {
+        resultsEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Generate 5 Ad Variants";
+      }
+    }
+
+    function angleClass(angle) {
+      const a = angle.toLowerCase();
+      if (a.includes("problem") || a.includes("agitate")) return "problem";
+      if (a.includes("solution") || a.includes("benefit")) return "solution";
+      if (a.includes("social") || a.includes("proof")) return "social_proof";
+      if (a.includes("urgency") || a.includes("scarcity")) return "urgency";
+      return "curiosity";
+    }
+
+    function scoreColor(score) {
+      if (score >= 7) return "green";
+      if (score >= 4) return "yellow";
+      return "red";
+    }
+
+    function barColor(score) {
+      if (score >= 7) return "#4ade80";
+      if (score >= 4) return "#fbbf24";
+      return "#f87171";
+    }
+
+    function renderScorePanel(score) {
+      if (!score) return "";
+
+      const color = scoreColor(score.overall);
+      const criteria = [
+        { label: "Hook Strength", key: "hook_strength" },
+        { label: "Clarity", key: "clarity" },
+        { label: "Emotional Impact", key: "emotional_impact" },
+        { label: "CTA Effectiveness", key: "cta_effectiveness" },
+      ];
+
+      let gridHtml = "";
+      for (const c of criteria) {
+        const val = score[c.key] || 0;
+        gridHtml += `
+          <div class="score-item">
+            <span>${c.label}</span>
+            <span>
+              <span class="score-bar"><span class="score-bar-fill" style="width:${val * 10}%;background:${barColor(val)}"></span></span>
+              ${val}/10
+            </span>
+          </div>`;
+      }
+
+      return `
+        <span class="score-badge ${color}" onclick="toggleScore(this)" title="Click to see details">${score.overall}/10</span>
+        <div class="score-panel">
+          <div class="score-panel-inner">
+            <div class="score-grid">${gridHtml}</div>
+            ${score.tip ? `<div class="score-tip">${score.tip}</div>` : ""}
+          </div>
+        </div>`;
+    }
+
+    function toggleScore(badge) {
+      const panel = badge.nextElementSibling;
+      if (panel) panel.classList.toggle("open");
+    }
+
+    function renderResults(data) {
+      const el = document.getElementById("results");
+      let html = `
+        <div class="results-header">
+          <h2>Generated Ads</h2>
+          <div class="results-actions">
+            <span class="source-badge">${data.source === "url" ? "From URL" : "From Idea"}</span>
+            ${data.tone ? `<span class="tone-badge">${data.tone}</span>` : ""}
+            <button class="action-btn" onclick="copyAll()">Copy All</button>
+            <button class="action-btn zip-btn" onclick="downloadZip()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download ZIP
+            </button>
+          </div>
+        </div>
+      `;
+
+      if (data.product_summary) {
+        html += `<div class="product-summary"><strong>AI Understanding:</strong> ${data.product_summary}</div>`;
+      }
+
+      html += '<div class="ads-grid">';
+
+      for (let i = 0; i < data.ads.length; i++) {
+        const ad = data.ads[i];
+        const cls = angleClass(ad.angle);
+        const hasImage = !!ad.image;
+
+        html += `
+          <div class="ad-card" data-headline="${escapeAttr(ad.headline)}" data-description="${escapeAttr(ad.description)}" data-cta="${escapeAttr(ad.cta)}" data-index="${i}">
+            <div class="ad-card-header">
+              <div class="angle-dot ${cls}"></div>
+              <span class="angle-label">${ad.angle}</span>
+              ${hasImage ? `
+                <button class="download-single-btn" onclick="downloadSingle(${i})" title="Download image">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+              ` : ""}
+            </div>
+            <div class="ad-primary-text">${ad.primary_text}</div>
+            <div class="ad-creative">
+              ${hasImage
+                ? `<img src="${ad.image}" alt="Ad creative">`
+                : `<div class="ad-creative-placeholder">Image generation failed</div>`
+              }
+            </div>
+            <div class="ad-bottom">
+              <span class="ad-audience">${ad.target_audience || ""}</span>
+              ${ad.score ? renderScorePanel(ad.score) : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      html += "</div>";
+      el.innerHTML = html;
+    }
+
+    function escapeAttr(str) {
+      return (str || "").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function downloadSingle(index) {
+      if (!lastGeneratedData || !lastGeneratedData.ads[index]?.image) return;
+      const ad = lastGeneratedData.ads[index];
+      const a = document.createElement("a");
+      a.href = ad.image;
+      a.download = `ad-${index + 1}-${ad.angle.toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    async function downloadZip() {
+      if (!lastGeneratedData) return;
+
+      const zipBtn = document.querySelector(".zip-btn");
+      zipBtn.textContent = "Creating ZIP...";
+      zipBtn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        const imgFolder = zip.folder("images");
+
+        // Add images
+        for (let i = 0; i < lastGeneratedData.ads.length; i++) {
+          const ad = lastGeneratedData.ads[i];
+          if (ad.image) {
+            const base64 = ad.image.split(",")[1];
+            const mimeMatch = ad.image.match(/data:([^;]+);/);
+            const ext = mimeMatch && mimeMatch[1].includes("png") ? "png" : "jpg";
+            imgFolder.file(`ad-${i + 1}-${ad.angle.toLowerCase()}.${ext}`, base64, { base64: true });
+          }
+        }
+
+        // Build ad-copy.txt
+        let copyText = `Ad Copy Tester - Generated Ads\n`;
+        copyText += `${"=".repeat(40)}\n`;
+        copyText += `Source: ${lastGeneratedData.source === "url" ? "URL" : "Idea"}\n`;
+        copyText += `Input: ${lastGeneratedData.input}\n`;
+        if (lastGeneratedData.tone) copyText += `Tone: ${lastGeneratedData.tone}\n`;
+        if (lastGeneratedData.product_summary) copyText += `AI Summary: ${lastGeneratedData.product_summary}\n`;
+        copyText += `\n`;
+
+        for (let i = 0; i < lastGeneratedData.ads.length; i++) {
+          const ad = lastGeneratedData.ads[i];
+          copyText += `--- Ad ${i + 1}: ${ad.angle} ---\n`;
+          copyText += `Headline: ${ad.headline}\n`;
+          copyText += `Primary Text: ${ad.primary_text}\n`;
+          copyText += `Description: ${ad.description}\n`;
+          copyText += `CTA: ${ad.cta}\n`;
+          copyText += `Target Audience: ${ad.target_audience || "N/A"}\n`;
+          if (ad.score) {
+            copyText += `Quality Score: ${ad.score.overall}/10\n`;
+            copyText += `  Hook: ${ad.score.hook_strength}/10 | Clarity: ${ad.score.clarity}/10 | Emotion: ${ad.score.emotional_impact}/10 | CTA: ${ad.score.cta_effectiveness}/10\n`;
+            if (ad.score.tip) copyText += `  Tip: ${ad.score.tip}\n`;
+          }
+          copyText += `\n`;
+        }
+
+        zip.file("ad-copy.txt", copyText);
+
+        const blob = await zip.generateAsync({ type: "blob" });
+        saveAs(blob, "ad-variants.zip");
+      } catch (err) {
+        console.error("ZIP error:", err);
+        alert("Failed to create ZIP: " + err.message);
+      } finally {
+        zipBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download ZIP`;
+        zipBtn.disabled = false;
+      }
+    }
+
+    function copyAll() {
+      const cards = document.querySelectorAll(".ad-card");
+      let text = "";
+      cards.forEach((card, i) => {
+        const angle = card.querySelector(".angle-label")?.textContent || "";
+        const primary = card.querySelector(".ad-primary-text")?.textContent || "";
+        const headline = card.dataset.headline || "";
+        const desc = card.dataset.description || "";
+        const cta = card.dataset.cta || "";
+        text += `--- Ad ${i + 1}: ${angle} ---\nHeadline: ${headline}\nPrimary Text: ${primary.trim()}\nDescription: ${desc}\nCTA: ${cta}\n\n`;
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".action-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = "Copy All"), 1500);
+      });
+    }
+
+    document.getElementById("url").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") generate();
+    });
+  </script>
+</body>
+</html>

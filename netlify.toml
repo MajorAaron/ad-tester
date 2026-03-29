@@ -1,0 +1,12 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[dev]
+  port = 8889
+  functions-timeout = 300
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
